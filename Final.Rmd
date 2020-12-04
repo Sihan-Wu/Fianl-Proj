@@ -1,0 +1,85 @@
+---
+title: "Final Project Preliminary EDA"
+output: html_notebook
+---
+```{r,warning=FALSE,message=FALSE}
+library(readr)
+library(DataComputing)
+library(tidyverse)
+```
+## Data Access
+```{r}
+CAR <- read_csv("CAR DETAILS FROM CAR DEKHO.csv")
+vehicles <- read_csv("vehicles.csv")
+```
+## Inspecting the initial data
+```{r}
+head(CAR,message=FALSE)
+head(vehicles,message=FALSE)
+```
+```{r}
+nrow(CAR)
+nrow(vehicles)
+```
+## Data Wrangling
+```{r}
+Without_Name_IN <-
+  CAR %>%
+  group_by(km_driven,fuel,transmission) %>%
+  summarise(price =mean(selling_price),total=n())
+
+Without_Name
+```
+```{r}
+str_replace(Without_Name_IN,pattern="Automatic",replacement="automatic")
+```
+```{r}
+Without_Name_US <-
+  vehicles %>%
+  filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
+  mutate(km_driven=odometer) %>%
+  group_by(km_driven,price,transmission,fuel) %>%
+  summarise(total=n()) 
+Without_Name_US
+```
+```{r}
+Combined_Table <-
+  Without_Name_IN %>%
+  mutate(price=price*0.014)%>% #change currency unit to usd
+  full_join(Without_Name_US)
+
+  auto_pattern <- regex("Automatic",ignore_case = T)
+  auto <-str_subset(Combined_Table,pattern=auto_pattern)
+  str_extract(auto,pattern=auto_pattern)
+  
+  manual_pattern <- regex("Manual",ignore_case = T)
+  manual <-str_subset(Combined_Table,pattern=manual_pattern)
+  str_extract(manual,pattern=manual_pattern)
+
+
+Combined_Table
+```
+```{r}
+Without_Name_IN %>%
+  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
+  facet_wrap(fuel~.) +
+  geom_point(aes(color=transmission),alpha=0.6)+
+  xlim(0,350000)+
+  ylim(0,40000000)
+```
+```{r}
+Without_Name_US %>%
+  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
+  facet_wrap(fuel~.) +
+  geom_point(aes(color=transmission),alpha=0.6)+
+  xlim(0,350000)+
+  ylim(0,400000)
+```
+```{r}
+Combined_Table %>%
+  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
+  facet_wrap(fuel~.) +
+  geom_point(aes(color=transmission),alpha=0.6)+
+  xlim(0,350000)+
+  ylim(0,90000)
+```

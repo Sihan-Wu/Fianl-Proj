@@ -8,66 +8,60 @@ library(DataComputing)
 library(tidyverse)
 ```
 ## Data Access
-```{r}
+```{r,warning=FALSE,message=FALSE}
 CAR <- read_csv("CAR DETAILS FROM CAR DEKHO.csv")
 vehicles <- read_csv("vehicles.csv")
 ```
 ## Inspecting the initial data
-```{r}
+```{r,warning=FALSE,message=FALSE}
 head(CAR,message=FALSE)
 head(vehicles,message=FALSE)
 ```
 ```{r}
 nrow(CAR)
 nrow(vehicles)
+ncol(CAR)
+ncol(vehicles)
 ```
 ## Data Wrangling
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Without_Name_IN <-
   CAR %>%
   group_by(km_driven,fuel,transmission) %>%
-  summarise(price =mean(selling_price),total=n())
+  summarise(price =mean(selling_price),total=n()) %>%
+  spread(key=fuel,value=total,fill=0) %>%
+  rename(diesel=Diesel,electric=Electric) 
+Without_Name_IN
+```
 
-Without_Name
-```
-```{r}
-str_replace(Without_Name_IN,pattern="Automatic",replacement="automatic")
-```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Without_Name_US <-
   vehicles %>%
   filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
   mutate(km_driven=odometer) %>%
   group_by(km_driven,price,transmission,fuel) %>%
-  summarise(total=n()) 
+  summarise(total=n()) %>%
+   spread(key=fuel,value=total,fill=0)
 Without_Name_US
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Combined_Table <-
   Without_Name_IN %>%
   mutate(price=price*0.014)%>% #change currency unit to usd
-  full_join(Without_Name_US)
-
-  auto_pattern <- regex("Automatic",ignore_case = T)
-  auto <-str_subset(Combined_Table,pattern=auto_pattern)
-  str_extract(auto,pattern=auto_pattern)
-  
-  manual_pattern <- regex("Manual",ignore_case = T)
-  manual <-str_subset(Combined_Table,pattern=manual_pattern)
-  str_extract(manual,pattern=manual_pattern)
+ full_join(Without_Name_US)
 
 
 Combined_Table
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Without_Name_IN %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
   facet_wrap(fuel~.) +
   geom_point(aes(color=transmission),alpha=0.6)+
   xlim(0,350000)+
-  ylim(0,40000000)
+  ylim(0,4000000)
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Without_Name_US %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
   facet_wrap(fuel~.) +
@@ -75,7 +69,7 @@ Without_Name_US %>%
   xlim(0,350000)+
   ylim(0,400000)
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 Combined_Table %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
   facet_wrap(fuel~.) +

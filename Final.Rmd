@@ -3,9 +3,11 @@ title: "Final Project Preliminary EDA"
 output: html_notebook
 ---
 ```{r,warning=FALSE,message=FALSE}
+rm(list=ls())
 library(readr)
 library(DataComputing)
 library(tidyverse)
+library(party)
 ```
 ## Data Access
 ```{r,warning=FALSE,message=FALSE}
@@ -28,9 +30,11 @@ ncol(vehicles)
 Without_Name_IN <-
   CAR %>%
   group_by(km_driven,fuel,transmission) %>%
-  summarise(price =mean(selling_price),total=n()) %>%
+  summarise(price =mean(selling_price),total=n())%>%
   spread(key=fuel,value=total,fill=0) %>%
-  rename(diesel=Diesel,electric=Electric) 
+  rename(diesel=Diesel,electric=Electric,Transmission=transmission) 
+
+Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)
 Without_Name_IN
 ```
 
@@ -54,26 +58,34 @@ Combined_Table <-
 Combined_Table
 ```
 ```{r,warning=FALSE,message=FALSE}
-Without_Name_IN %>%
-  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
-  facet_wrap(fuel~.) +
-  geom_point(aes(color=transmission),alpha=0.6)+
-  xlim(0,350000)+
-  ylim(0,4000000)
+logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR)
+summary(logfit)
+plot(logfit)
 ```
 ```{r,warning=FALSE,message=FALSE}
-Without_Name_US %>%
-  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
+CAR %>%
+  ggplot(aes(x=km_driven, y=selling_price, fill=transmission)) +
+  facet_wrap(fuel~.) +
+  geom_point(aes(color=transmission), alpha=0.6)+
+  geom_boxplot(alpha=0.3)+
+  xlim(0,350000)+
+  ylim(0,3000000)
+```
+```{r,warning=FALSE,message=FALSE}
+vehicles %>%
+  filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
+  ggplot(aes(x=odometer,y=price,fill=transmission),xlab="km_driven",ylab="selling_price") +
   facet_wrap(fuel~.) +
   geom_point(aes(color=transmission),alpha=0.6)+
+  geom_boxplot(alpha=0.3)+
   xlim(0,350000)+
-  ylim(0,400000)
+  ylim(0,300000)
 ```
 ```{r,warning=FALSE,message=FALSE}
 Combined_Table %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
-  facet_wrap(fuel~.) +
   geom_point(aes(color=transmission),alpha=0.6)+
+  geom_boxplot(alpha=0.3)+
   xlim(0,350000)+
-  ylim(0,90000)
+  ylim(0,300000)
 ```

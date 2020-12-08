@@ -32,7 +32,8 @@ Without_Name_IN <-
   group_by(km_driven,fuel,transmission) %>%
   summarise(price =mean(selling_price),total=n())%>%
   spread(key=fuel,value=total,fill=0) %>%
-  rename(diesel=Diesel,electric=Electric,Transmission=transmission) 
+  rename(diesel=Diesel,electric=Electric,Transmission=transmission) %>%
+  mutate(country="India")
 
 Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)
 Without_Name_IN
@@ -45,7 +46,9 @@ Without_Name_US <-
   mutate(km_driven=odometer) %>%
   group_by(km_driven,price,transmission,fuel) %>%
   summarise(total=n()) %>%
-   spread(key=fuel,value=total,fill=0)
+   spread(key=fuel,value=total,fill=0)%>%
+  mutate(country="America")
+
 Without_Name_US
 ```
 ```{r,warning=FALSE,message=FALSE}
@@ -85,7 +88,8 @@ vehicles %>%
 Combined_Table %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
   geom_point(aes(color=transmission),alpha=0.6)+
-  geom_boxplot(alpha=0.3)+
+  geom_boxplot(alpha=0.5)+
+  facet_wrap(country~.)+
   xlim(0,350000)+
   ylim(0,300000)
 ```

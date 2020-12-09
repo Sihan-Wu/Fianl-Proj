@@ -71,7 +71,7 @@ Combined_Table <-
 Combined_Table
 ```
 ```{r,warning=FALSE,message=FALSE}
-logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR) # try to figure out the relationship betwen selling price and other variables 
+logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR) # try to figure out the relationship between selling price and other variables 
 summary(logfit)
 plot(logfit) # check the model assumption 
 ```

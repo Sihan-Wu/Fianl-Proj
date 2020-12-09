@@ -5,7 +5,8 @@ output: html_notebook
 
 ## Research Question 
 
-Since I came to Penn State, I have learned a lot about countries. However, I feel like I still haven't learned anything about India yet. Therefore, I decided to analysis some second hand vehicle market data in India.  
+Since I came to Penn State, I have learned a lot about other countries. However, I feel like I still haven't learned anything about India yet. Therefore, I decided to analyze some second hand vehicle market data from India.  
+
 + What are the factors that are affecting the selling price of used cars in India?
 + Are cars with automatic transmission generally more expensive than cars with manual transmission?(in my theory automatic transmission should be more expensive)
 + Is the data from Indian market same as the US market? 

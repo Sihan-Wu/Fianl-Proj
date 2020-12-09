@@ -1,7 +1,15 @@
 ---
-title: "Final Project Preliminary EDA"
+title: "Second Hand Vehicle Market in India"
 output: html_notebook
 ---
+
+## Research Question 
+
+Since I came to Penn State, I have learned a lot about countries. However, I feel like I still haven't learned anything about India yet. Therefore, I decided to analysis some second hand vehicle market data in India.  
++ What are the factors that are affecting the selling price of used cars in India?
++ Are cars with automatic transmission generally more expensive than cars with manual transmission?(in my theory automatic transmission should be more expensive)
++ Is the data from Indian market same as the US market? 
+
 ```{r,warning=FALSE,message=FALSE}
 rm(list=ls())
 library(readr)
@@ -19,7 +27,7 @@ vehicles <- read_csv("vehicles.csv")
 head(CAR,message=FALSE)
 head(vehicles,message=FALSE)
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE} 
 nrow(CAR)
 nrow(vehicles)
 ncol(CAR)
@@ -30,12 +38,13 @@ ncol(vehicles)
 Without_Name_IN <-
   CAR %>%
   group_by(km_driven,fuel,transmission) %>%
-  summarise(price =mean(selling_price),total=n())%>%
-  spread(key=fuel,value=total,fill=0) %>%
-  rename(diesel=Diesel,electric=Electric,Transmission=transmission) %>%
+  summarise(price =mean(selling_price), total=n())%>%
+  spread(key=fuel, value=total, fill=0) %>%
+  rename(diesel=Diesel, electric=Electric, Transmission=transmission) %>% # so that two tables can match 
   mutate(country="India")
 
-Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)
+Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)# My biggest challenge! 
+
 Without_Name_IN
 ```
 
@@ -46,7 +55,7 @@ Without_Name_US <-
   mutate(km_driven=odometer) %>%
   group_by(km_driven,price,transmission,fuel) %>%
   summarise(total=n()) %>%
-   spread(key=fuel,value=total,fill=0)%>%
+   spread(key=fuel, value=total, fill=0)%>%
   mutate(country="America")
 
 Without_Name_US
@@ -61,10 +70,11 @@ Combined_Table <-
 Combined_Table
 ```
 ```{r,warning=FALSE,message=FALSE}
-logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR)
+logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR) # try to figure out the relationship betwen selling price and other variables 
 summary(logfit)
-plot(logfit)
+plot(logfit) # check the model assumption 
 ```
+#Data Visualization 
 ```{r,warning=FALSE,message=FALSE}
 CAR %>%
   ggplot(aes(x=km_driven, y=selling_price, fill=transmission)) +
@@ -92,4 +102,14 @@ Combined_Table %>%
   facet_wrap(country~.)+
   xlim(0,350000)+
   ylim(0,300000)
+
+#This graph will show a direct comparison between 
 ```
+## Challenge 
++ My biggest challenge! When trying to combine two tables, the India table has capital cased transmission (Automatic/Manual) while the US table has lower cased (automatic/manual). In order to effectively compare two data sets, I took hours of work to figure this way - lower case the entire column instead of matching
+
+## Key Takeaway
++ According to the data from India, since the p-value is less than 0.05, we can conclude that transmission, fuel, km_driven, year, seller type, and number of owners are significant predictors of selling price in the India market. 
++ For India market, the selling price for auto transmission is significantly higher than manual transmission. 
++ In comparison, the selling price for auto transmission and manual transmission are about the same in the US. 
++ The Indian market favors automatic transmission while the Us market is indifferent. 

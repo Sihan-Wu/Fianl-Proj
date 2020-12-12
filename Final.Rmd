@@ -36,15 +36,15 @@ ncol(vehicles)
 ```
 ## Data Wrangling
 ```{r,warning=FALSE,message=FALSE}
-Without_Name_IN <-
+Without_Name_IN <- # data wrangling the table for used car market data from India
   CAR %>%
-  group_by(km_driven,fuel,transmission) %>%
-  summarise(price =mean(selling_price), total=n())%>%
-  spread(key=fuel, value=total, fill=0) %>%
+  group_by(km_driven,fuel,transmission) %>% # factors that I would like to explore with graph 
+  summarise(price=mean(selling_price), total=n())%>%
+  spread(key=fuel, value=total, fill=0) %>% # spread the fuel category to make the comparison more effective
   rename(diesel=Diesel, electric=Electric, Transmission=transmission) %>% # so that two tables can match 
-  mutate(country="India")
+  mutate(country="India") # identify the country
 
-Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)# My biggest challenge! 
+Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)# in order to later match with the Us data  
 
 Without_Name_IN
 ```
@@ -52,8 +52,8 @@ Without_Name_IN
 ```{r,warning=FALSE,message=FALSE}
 Without_Name_US <-
   vehicles %>%
-  filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
-  mutate(km_driven=odometer) %>%
+  filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>% # filter our the NA values and new cars (since we are comparing the used cars)
+  mutate(km_driven=odometer) %>% # match the variable name from India 
   group_by(km_driven,price,transmission,fuel) %>%
   summarise(total=n()) %>%
    spread(key=fuel, value=total, fill=0)%>%
@@ -71,10 +71,14 @@ Combined_Table <-
 Combined_Table
 ```
 ```{r,warning=FALSE,message=FALSE}
-logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR) # try to figure out the relationship between selling price and other variables 
+logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owner, data = CAR) # try to figure out the relationship between selling price and other variables. Log transformation is applied in order to met the model assumptions
 summary(logfit)
 plot(logfit) # check the model assumption 
 ```
+Key Takeaways from the table
+
++ Transmission type, fuel type, number of previous owners, seller type, year of the car, and km_driven are significant predictors of selling price for the used car in Indian market. 
+
 #Data Visualization 
 ```{r,warning=FALSE,message=FALSE}
 CAR %>%
@@ -82,19 +86,37 @@ CAR %>%
   facet_wrap(fuel~.) +
   geom_point(aes(color=transmission), alpha=0.6)+
   geom_boxplot(alpha=0.3)+
-  xlim(0,350000)+
-  ylim(0,3000000)
+  ylab("price") + 
+  xlim(0,350000)+ # majority of cars have millage bellow 350000, in order to reduce the effect of outliers, the max is set to 350000. 
+  ylim(0,3000000)# majority of cars have selling price bellow 3000000, in order to reduce the effect of outliers, the max is set to 3000000. 
 ```
++ Auto transmission is predominantly in the diesel and petrol category while manual is existing in all categories except electric. 
++ There is a negative linear relationship between millage and selling price in all fuel types. 
 ```{r,warning=FALSE,message=FALSE}
 vehicles %>%
   filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
-  ggplot(aes(x=odometer,y=price,fill=transmission),xlab="km_driven",ylab="selling_price") +
+  ggplot(aes(x=odometer,y=price,fill=transmission)) +
   facet_wrap(fuel~.) +
   geom_point(aes(color=transmission),alpha=0.6)+
+  xlab("km_driven") + 
   geom_boxplot(alpha=0.3)+
   xlim(0,350000)+
   ylim(0,300000)
 ```
++ All fuel types have three kinds of transmissions, the difference in the medial price among three transmissions is small. 
++ There is a negative linear relationship between millage and selling price in all fuel types.
+
+```{r,warning=FALSE,message=FALSE}
+Combined_Table %>%
+  ggplot(aes(x=km_driven,y=price,fill=transmission)) +
+  geom_point(aes(color=transmission),alpha=0.6)+
+  geom_boxplot(alpha=0.5)+
+  xlim(0,350000)+
+  ylim(0,300000)
+```
++ The plot is about the combined table for both India and America. From the graph, there is a negative linear relationship between millage and selling price.
++ The auto transmission still has slightly higher median price than manual transmission even though the have similar range. 
+
 ```{r,warning=FALSE,message=FALSE}
 Combined_Table %>%
   ggplot(aes(x=km_driven,y=price,fill=transmission)) +
@@ -103,11 +125,12 @@ Combined_Table %>%
   facet_wrap(country~.)+
   xlim(0,350000)+
   ylim(0,300000)
-
-#This graph will show a direct comparison between 
 ```
++ In India, the median selling price for auto transmission is much higher than manual transmission. Auto transmission also have wider price range. 
++ In America, the difference in median selling price between auto and manual transmission is not obvious. However, since there is a "other" type of transmission, after research, still belongs to the broader category of auto transmission. Therefore, auto transmission still have higher median selling price. 
+
 ## Challenge 
-+ My biggest challenge! When trying to combine two tables, the India table has capital cased transmission (Automatic/Manual) while the US table has lower cased (automatic/manual). In order to effectively compare two data sets, I took hours of work to figure this way - lower case the entire column instead of matching
++ My biggest challenge is when trying to combine two tables, the India table has capital cased transmission (Automatic/Manual) while the US table has lower cased (automatic/manual). In order to effectively compare two data sets, I took hours of work to figure this way - lower case the entire column instead of matching. I also had to rename some of my variables so that R would treat those as same category. 
 
 ## Key Takeaway
 + According to the data from India, since the p-value is less than 0.05, we can conclude that transmission, fuel, km_driven, year, seller type, and number of owners are significant predictors of selling price in the India market. 

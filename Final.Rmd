@@ -5,7 +5,7 @@ output: html_notebook
 
 ## Research Question 
 
-Since I came to Penn State, I have learned a lot about other countries. However, I feel like I still haven't learned anything about India yet. Therefore, I decided to analyze some second hand vehicle market data from India.  
+Since I came to Penn State, I have learned a lot about other countries. However, I feel like I still haven't learned anything about India yet. Therefore, combining with my interest in cars, I decided to analyze some second hand vehicle market data from India.  
 
 + What are the factors that are affecting the selling price of used cars in India?
 + Are cars with automatic transmission generally more expensive than cars with manual transmission?(in my theory automatic transmission should be more expensive)
@@ -17,6 +17,8 @@ library(readr)
 library(DataComputing)
 library(tidyverse)
 library(party)
+library(rpart)
+library(rpart.plot)
 ```
 ## Data Access
 ```{r,warning=FALSE,message=FALSE}
@@ -34,6 +36,9 @@ nrow(vehicles)
 ncol(CAR)
 ncol(vehicles)
 ```
+
+8 variables and 4340 observations in CAR table, 25 variables and 423857 observations in vehicles table. 
+
 ## Data Wrangling
 ```{r,warning=FALSE,message=FALSE}
 Without_Name_IN <- # data wrangling the table for used car market data from India
@@ -44,13 +49,13 @@ Without_Name_IN <- # data wrangling the table for used car market data from Indi
   rename(diesel=Diesel, electric=Electric, Transmission=transmission) %>% # so that two tables can match 
   mutate(country="India") # identify the country
 
-Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)# in order to later match with the Us data  
+Without_Name_IN$transmission=tolower(Without_Name_IN$Transmission)# in order to later match with the US data  
 
 Without_Name_IN
 ```
 
 ```{r,warning=FALSE,message=FALSE}
-Without_Name_US <-
+Without_Name_US <- # data wrangling the table for used car market data from US
   vehicles %>%
   filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>% # filter our the NA values and new cars (since we are comparing the used cars)
   mutate(km_driven=odometer) %>% # match the variable name from India 
@@ -75,9 +80,14 @@ logfit<- lm(log(selling_price)~transmission+year+km_driven+fuel+seller_type+owne
 summary(logfit)
 plot(logfit) # check the model assumption 
 ```
+```{r,warning=FALSE,message=FALSE}
+treemod <- rpart(selling_price~transmission+year+fuel+km_driven, data=CAR)
+prp(treemod)
+```
 Key Takeaways from the table
 
 + Transmission type, fuel type, number of previous owners, seller type, year of the car, and km_driven are significant predictors of selling price for the used car in Indian market. 
++ Each condition of the car can lead to different price. 
 
 #Data Visualization 
 ```{r,warning=FALSE,message=FALSE}
@@ -92,14 +102,15 @@ CAR %>%
 ```
 + Auto transmission is predominantly in the diesel and petrol category while manual is existing in all categories except electric. 
 + There is a negative linear relationship between millage and selling price in all fuel types. 
+
 ```{r,warning=FALSE,message=FALSE}
 vehicles %>%
   filter(!is.na(price),!is.na(transmission),!is.na(fuel),!is.na(odometer),odometer != 0) %>%
   ggplot(aes(x=odometer,y=price,fill=transmission)) +
   facet_wrap(fuel~.) +
   geom_point(aes(color=transmission),alpha=0.6)+
-  xlab("km_driven") + 
-  geom_boxplot(alpha=0.3)+
+  geom_boxplot(alpha=0.3)+ 
+  xlab("km_driven") +
   xlim(0,350000)+
   ylim(0,300000)
 ```
@@ -137,3 +148,6 @@ Combined_Table %>%
 + For India market, the selling price for auto transmission is significantly higher than manual transmission. 
 + In comparison, the selling price for auto transmission and manual transmission are about the same in the US. 
 + The Indian market favors automatic transmission while the Us market is indifferent. 
+
+## Github repo
+[Click here](https://sihan-wu.github.io/Fianl-Proj/) 

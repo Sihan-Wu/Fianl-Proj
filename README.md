@@ -6,7 +6,7 @@ Since I came to Penn State, I have learned a lot about other countries. However,
 + Are cars with automatic transmission generally more expensive than cars with manual transmission?(in my theory automatic transmission should be more expensive)
 + Is the data from Indian market same as the US market? 
 
-Specific data and plots can be found at 
+Specific data and plots can be found at [here](https://psu.instructure.com/courses/2061899/assignments/12043878?module_item_id=29978898) 
 
 ## Challenge 
 + My biggest challenge is when trying to combine two tables, the India table has capital cased transmission (Automatic/Manual) while the US table has lower cased (automatic/manual). In order to effectively compare two data sets, I took hours of work to figure this way - lower case the entire column instead of matching

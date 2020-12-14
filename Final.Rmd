@@ -89,7 +89,7 @@ Key Takeaways from the table
 + Transmission type, fuel type, number of previous owners, seller type, year of the car, and km_driven are significant predictors of selling price for the used car in Indian market. 
 + Each condition of the car can lead to different price. 
 
-#Data Visualization 
+# Data Visualization 
 ```{r,warning=FALSE,message=FALSE}
 CAR %>%
   ggplot(aes(x=km_driven, y=selling_price, fill=transmission)) +
